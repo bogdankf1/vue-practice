@@ -31,7 +31,7 @@ export default {
       options: FILTER_OPTIONS,
     };
   },
-  emits: ["set-filter-mode"],
+  emits: ["set-filter-mode", "clear-completed"],
 };
 </script>
 

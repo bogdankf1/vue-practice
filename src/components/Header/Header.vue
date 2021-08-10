@@ -1,9 +1,15 @@
 <template>
   <div class="root">
-    <div class="title">{{ title }}'s todolist</div>
+    <router-link to="/">
+      <div class="title">{{ title }}'s todolist</div>
+    </router-link>
     <div class="buttons-box">
-      <div class="auth-btn">Sign In</div>
-      <div class="auth-btn">Sign Up</div>
+      <router-link to="/sign-in">
+        <div class="auth-btn">Sign In</div>
+      </router-link>
+      <router-link to="/sign-up">
+        <div class="auth-btn">Sign Up</div>
+      </router-link>
     </div>
   </div>
 </template>
