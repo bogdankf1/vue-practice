@@ -1,28 +1,29 @@
 <template>
   <div class="container">
-    <InputField title="TASKS" @add-item="addItem" @toggle-all="toggleAll" />
+    <InputField title="TASKS" @add-item="onAddItem" @toggle-all="onToggleAll" />
     <Todolist
-      @delete-item="removeItem"
-      @toggle-item="toggleItem"
-      @update-item="updateItem"
+      @delete-item="onRemoveItem"
+      @toggle-item="onToggleItem"
+      @update-item="onUpdateItem"
       :list="displayingList"
     />
     <FiltersPanel
       :list="displayingList"
       :activeItemsCount="activeItemsCount"
       :isClearCompletedShown="isClearCompletedShown"
-      @clear-completed="clearCompleted"
-      @set-filter-mode="setFilterMode"
+      @clear-completed="onClearCompleted"
+      @set-filter-mode="onSetFilterMode"
     />
   </div>
 </template>
 
 <script>
 import { v4 as uuidv4 } from "uuid";
+import { mapMutations, mapState, mapGetters } from "vuex";
 import InputField from "../components/InputField/InputField";
 import Todolist from "../components/Todolist/Todolist";
 import FiltersPanel from "../components/FiltersPanel/FiltersPanel";
-import { FILTER_MODES, FILTER_OPTIONS } from "../constants/filterOptions";
+import { FILTER, TODOS, TODO_GETTERS } from "../types";
 
 export default {
   name: "App",
@@ -32,19 +33,9 @@ export default {
     FiltersPanel,
   },
   data() {
-    return {
-      list: [],
-      filterMode: FILTER_OPTIONS[0],
-    };
+    return {};
   },
   created() {
-    this.list = [
-      {
-        id: uuidv4(),
-        title: "Default item",
-        isActive: true,
-      },
-    ];
     this.data = {
       ...this.data,
       activeItemsCount: this.activeItemsCount,
@@ -53,71 +44,46 @@ export default {
     };
   },
   computed: {
-    isEveryActive() {
-      return this.list.every((item) => item.isActive);
-    },
-    activeItemsCount() {
-      return this.list.filter((item) => item.isActive).length;
-    },
-    isClearCompletedShown() {
-      return this.list.some((item) => !item.isActive);
-    },
-    displayingList() {
-      return this.list.filter((item) => {
-        if (this.filterMode.id === FILTER_MODES.ACTIVE) {
-          return item.isActive;
-        } else if (this.filterMode.id === FILTER_MODES.COMPLETED) {
-          return !item.isActive;
-        }
-        return true;
-      });
-    },
+    ...mapState({
+      filterMode: (state) => state.todolist.filterMode,
+    }),
+    ...mapGetters({
+      isEveryActive: TODO_GETTERS.IS_EVERY_ACTIVE,
+      activeItemsCount: TODO_GETTERS.ACTIVE_ITEMS_COUNT,
+      isClearCompletedShown: TODO_GETTERS.IS_CLEAR_COMPLETED_SHOWN,
+      displayingList: TODO_GETTERS.DISPLAYING_LIST,
+    }),
   },
   methods: {
-    addItem(value) {
-      this.list = [
-        ...this.list,
-        { title: value, isActive: true, id: uuidv4() },
-      ];
+    ...mapMutations({
+      addItem: TODOS.ADD,
+      removeItem: TODOS.REMOVE,
+      updateItem: TODOS.UPDATE,
+      toggleItem: TODOS.TOGGLE,
+      clearCompletedItems: TODOS.CLEAR_COMPLETED,
+      toggleAllItems: TODOS.TOGGLE_ALL,
+      setFilterMode: FILTER.SET_MODE,
+    }),
+    onAddItem(value) {
+      this.addItem({ item: { title: value, isActive: true, id: uuidv4() } });
     },
-    removeItem(id) {
-      this.list = this.list.filter((item) => item.id !== id);
+    onRemoveItem(id) {
+      this.removeItem({ id });
     },
-    updateItem(id, value) {
-      this.list = this.list.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            title: value,
-          };
-        }
-        return item;
-      });
+    onUpdateItem(id, value) {
+      this.updateItem({ id, value });
     },
-    toggleItem(id) {
-      this.list = this.list.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            isActive: !item.isActive,
-          };
-        }
-        return item;
-      });
+    onToggleItem(id) {
+      this.toggleItem({ id });
     },
-    clearCompleted() {
-      this.list = this.list.filter((item) => item.isActive);
+    onClearCompleted() {
+      this.clearCompletedItems();
     },
-    toggleAll() {
-      this.list = this.list.map((item) => {
-        return {
-          ...item,
-          isActive: !this.isEveryActive,
-        };
-      });
+    onToggleAll() {
+      this.toggleAllItems({ isEveryActive: this.isEveryActive });
     },
-    setFilterMode(mode) {
-      this.filterMode = mode;
+    onSetFilterMode(mode) {
+      this.setFilterMode({ mode });
     },
   },
 };

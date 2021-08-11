@@ -1,0 +1,11 @@
+export const TODOS = {
+  ADD: "ADD",
+  REMOVE: "REMOVE",
+  UPDATE: "UPDATE",
+  TOGGLE: "TOGGLE",
+  CLEAR_COMPLETED: "CLEAR_COMPLETED",
+  TOGGLE_ALL: "TOGGLE_ALL",
+};
+export const FILTER = {
+  SET_MODE: "SET_MODE",
+};
